@@ -1,0 +1,131 @@
+#include <main.h>
+#include <stdlib.h>
+#use delay(clock=4M)
+#fuses XT,NOWDT,NOPROTECT,HS
+#use fast_io(d)
+#use fast_io(c)
+#use fast_io(b)
+int8 salise=0,san=0,dak=0,saat=0,durum=0,kur1=1,set=0,atl=0,salisei=0,sani=0,daki=0,sat=0;//DEÐÝÞKENLERÝN TANIMLANMASI
+int segmen[4] = {0};
+unsigned int seg[]={ 
+                   
+                    0x60, //1
+                    0xDA, //2
+                    0xF2, //3
+                    0x66, //4
+                    0xB6, //5
+                    0xBE, //6
+                    0xE0, //7
+                    0xFE, //8
+                    0xF6, //9
+                    0xEE, //A
+                    0x3E, //b
+                    0x9C, //C
+                    0x7A  //D
+                    0xFC, //0
+                   };
+
+
+
+#int_TIMER0 //GERÇEK ZAMANLI SAYIM ÝÇÝN TIMER1 KESMESÝ
+void  TIMER0_isr(void) 
+{
+set_timer0(15510);
+salise++;
+salisei--;
+
+}
+
+
+void seven_segment_tarama()
+{
+     output_d(seg[segmen[0]-1]);output_high(pin_c0); 
+     delay_ms(2);output_low(pin_c0); 
+    
+     output_d(seg[segmen[1]-1]);output_high(pin_c1);
+     delay_ms(2);output_low(pin_c1);      
+
+     output_d(seg[segmen[2]-1]);output_high(pin_c2);
+     delay_ms(2);output_low(pin_c2);   
+
+     output_d(seg[segmen[3]-1]);output_high(pin_c4); 
+     delay_ms(2);output_low(pin_c4);  
+}
+
+void ileri(){
+   if(salise==10){
+   san++;
+   salise=0;
+   }
+
+   else if(san==60){
+      dak++;
+      san=0;
+      }
+      
+      else if(dak==60){
+      saat++;
+      dak=0;
+      }
+      
+      else if(saat==24)saat=0;
+      
+    
+   
+  salisei=salise;
+  daki=dak;
+  sat=saat;
+  sani=san;
+  
+}
+
+
+
+
+
+
+
+
+
+
+void main()
+{
+set_timer0(0);
+set_tris_d(0x00);
+output_d(0);
+set_tris_c(0x00);
+output_c(0);
+
+   setup_timer_0(RTCC_INTERNAL|RTCC_DIV_1);
+   setup_timer_1(T1_DISABLED);
+   setup_timer_2(T2_DISABLED,0,1);
+   setup_ccp1(CCP_OFF);
+   setup_comparator(NC_NC_NC_NC);
+   setup_vref(FALSE);
+   enable_interrupts(INT_TIMER0);
+   enable_interrupts(GLOBAL);
+set_timer0(0);
+
+   while(TRUE)
+   {  
+        
+ileri();
+segmen[0] = dak/10;
+segmen[1] = san/10;
+segmen[2] = san;
+
+
+/*    
+output_d(seg[segmen[1]-1]);output_high(pin_c1); 
+delay_ms(2);output_low(pin_c1);      
+*/
+
+seven_segment_tarama();
+
+   
+  
+
+   }
+
+}
+

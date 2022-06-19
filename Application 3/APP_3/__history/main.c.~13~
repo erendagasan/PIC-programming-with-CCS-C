@@ -1,0 +1,124 @@
+#include <main.h>
+#include <stdlib.h>
+#use delay(clock=4M)
+#fuses XT,NOWDT,NOPROTECT
+#use fast_io(d)
+#use fast_io(c)
+#use fast_io(b)
+int8 salise=0,san=0,dak=0,saat=0,durum=0,kur1=1,set=0,atl=0,salisei=0,sani=0,daki=0,sat=0;//DEÐÝÞKENLERÝN TANIMLANMASI
+int segmen[4] = {0};
+
+
+unsigned int seg[]={ 
+                   
+                    0x60, //1
+                    0xDA, //2
+                    0xF2, //3
+                    0x66, //4
+                    0xB6, //5
+                    0xBE, //6
+                    0xE0, //7
+                    0xFE, //8
+                    0xF6, //9
+                    0xEE, //A
+                    0x3E, //b
+                    0x9C, //C
+                    0x7A  //D
+                    0xFC, //0
+                   };
+
+unsigned int saniye,birler=0,onlar=0,dakika,d_birler=0,d_onlar=0;
+unsigned int i=100;
+#int_TIMER0 //GERÇEK ZAMANLI SAYIM ÝÇÝN TIMER1 KESMESÝ
+void  TIMER0_int(void) 
+{
+set_timer0(60);
+
+if(birler%2==1)
+{
+output_high(pin_b7);
+
+}
+
+else if(birler%2==0)
+{
+output_b(0);
+
+}
+saniye=i%60;
+birler=saniye%10;
+onlar=saniye/10;
+
+dakika=i/60;
+d_birler=dakika%10;
+d_onlar=dakika/10;
+   
+i++;
+
+
+}
+
+
+void seven_segment_tarama()
+{
+     output_d(seg[segmen[birler]]);output_high(pin_c0); 
+     delay_ms(2);output_low(pin_c0); 
+    
+     output_d(seg[segmen[onlar]]);output_high(pin_c1);
+     delay_ms(2);output_low(pin_c1);      
+
+     output_d(seg[segmen[d_birler]]);output_high(pin_c2);
+     delay_ms(2);output_low(pin_c2);   
+
+     output_d(seg[segmen[d_onlar]]);output_high(pin_c4); 
+     delay_ms(2);output_low(pin_c4);  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+void main()
+{
+
+set_tris_d(0x00);
+output_d(0);
+set_tris_c(0x00);
+set_tris_b(0x00);
+output_c(0);
+output_b(0);
+ setup_psp(PSP_DISABLed);
+ setup_spi(SPI_SS_DISABLed);
+ setup_timer_1(T1_DISABLed);
+ setup_timer_2(T2_DISABLed,0,1);
+ setup_adc_ports(ALL_ANALOG);
+ setup_adc(ADC_CLOCK_INTERNAL);
+ 
+   setup_timer_0(RTCC_INTERNAL|RTCC_DIV_256);
+
+   setup_ccp1(CCP_OFF);
+   setup_comparator(NC_NC_NC_NC);
+   setup_vref(FALSE);
+   enable_interrupts(INT_TIMER0);
+   enable_interrupts(GLOBAL);
+set_timer0(60);
+
+   while(TRUE)
+   {  
+        
+seven_segment_tarama();
+
+   
+  
+
+   }
+
+}
+
